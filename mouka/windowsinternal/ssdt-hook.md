@@ -1,6 +1,6 @@
 # SSDT\(Shadow\) Hook
 
-\[TOC\]
+[TOC]
 
 ## Basic struct
 
