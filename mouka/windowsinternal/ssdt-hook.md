@@ -726,6 +726,3 @@ SuperCopyMemory(&ntTable[FunctionIndex], newOffset);
 
 **DONE!**
 
-<!--stackedit_data:
-eyJoaXN0b3J5IjpbLTIwNTY0NDEyNzhdfQ==
--->

@@ -1,5 +1,4 @@
-# Injection Method
-
+# InjectionMethod
 
 ## R3 Dll 注入方式总结
 
@@ -30,30 +29,36 @@ HANDLE CreateRemoteThread(
 );
 ```
 
-该方法在CreateRemoteThread 在目标进程中创建一个线程，再通过 新创建的线程进行dll注入 
-获取函数 LoadLibrary 在内存中的地址
-```c    
+该方法在CreateRemoteThread 在目标进程中创建一个线程，再通过 新创建的线程进行dll注入 获取函数 LoadLibrary 在内存中的地址
+
+```c
 loadLibraryAddr = GetProcAddress(GetModuleHandle("kernel32.dll"), "LoadLibraryA");
-``` 
+```
+
 在目标进程空间给将要注入的dll路径字符串（形如“c:\my.dll”）分配空间
+
 ```c
 remoteDllAddr = VirtualAllcoEx (targetProcess, NULL, str(myDllPath)+1, MEM_COMMIT | MEM_READWRITE);
 ```
+
 将dll路径 写入目标进程空间
+
 ```c
-WriteProcesMemory(targetProcess, remoteDllAddr, (LPVOID)myDllPath, strlen(myDllPath)+1, NULL);  
+WriteProcesMemory(targetProcess, remoteDllAddr, (LPVOID)myDllPath, strlen(myDllPath)+1, NULL);
 ```
+
 创建远程线程
+
 ```c
 CreateRemoteThread(
-	      targetProcess,    // 目标进程
-	      NULL,
-	      0,
-	      // 线程的执行函数（此处是LoadLibrary)
-	      (LPTHREAD_START_ROUTINE)loadLibraryAddr, 
-	      // 执行函数的参数（此处是 需要载入的dll路径）
-	      remoteDllPath,
-	      NULL,NULL    );    
+          targetProcess,    // 目标进程
+          NULL,
+          0,
+          // 线程的执行函数（此处是LoadLibrary)
+          (LPTHREAD_START_ROUTINE)loadLibraryAddr, 
+          // 执行函数的参数（此处是 需要载入的dll路径）
+          remoteDllPath,
+          NULL,NULL    );
 ```
 
 **通过该方法创建的线程，其创建进程和父进程均为 目标进程 ！**
@@ -85,7 +90,7 @@ DWORD QueueUserAPC(
 
 和 CreateRemoteThread相同，pfnAPC 指向 LoadLibrary 的内存地址，dwData则为需要注入的dll的 路径
 
-  **（目标线程的状态必须为 Alertable，否则不会执行 APC ）**
+**（目标线程的状态必须为 Alertable，否则不会执行 APC ）**
 
 ### 4. SetThreadContext 方法
 
@@ -93,22 +98,22 @@ DWORD QueueUserAPC(
 
 由于该方法无法传递参数，因此需要在目标进程中写入一段 汇编代码 用于处理参数并调用 LoadLibrary，然后将EIP指向该段代码起始地址，汇编码如下所示：
 
-  **（写入内容实际是汇编代码对应的机器码）**
+**（写入内容实际是汇编代码对应的机器码）**
 
 ```c
 // 0xAAAAAAAA 为占位符，以后会被替换   
 unsigned char shellcode[] =   {
-	 0x68, 0xef, 0xbe, 0xad, 0xde,        // push 0xAAAAAAAA, 将原EIP值压栈
-	 0x9c,                              // pushfd，通用寄存器压栈
-	 0x60,                              // pushad，标志寄存器压栈
-	 0x68, 0xef, 0xbe, 0xad, 0xde,        // push 0xAAAAAAAA， 将dll路径压栈（传参）
-	 0xb8, 0xef, 0xbe, 0xad, 0xde,        // mov eax, 0xAAAAAAAA 
-	 0xff, 0xd0,                          // call eax， 调用 LoadLibrary
-	 0x61,                             // popad
-	 0x9d,                             //popfd
-	 0xc3                             //ret   
-	 };
-   ```
+     0x68, 0xef, 0xbe, 0xad, 0xde,        // push 0xAAAAAAAA, 将原EIP值压栈
+     0x9c,                              // pushfd，通用寄存器压栈
+     0x60,                              // pushad，标志寄存器压栈
+     0x68, 0xef, 0xbe, 0xad, 0xde,        // push 0xAAAAAAAA， 将dll路径压栈（传参）
+     0xb8, 0xef, 0xbe, 0xad, 0xde,        // mov eax, 0xAAAAAAAA 
+     0xff, 0xd0,                          // call eax， 调用 LoadLibrary
+     0x61,                             // popad
+     0x9d,                             //popfd
+     0xc3                             //ret   
+     };
+```
 
 注入流程简述如下：
 
@@ -121,7 +126,8 @@ unsigned char shellcode[] =   {
 使用 `SuspendThread(htargetThread)` 挂起目标线程，并使用`GetThreadContext(targetThread, &context)` 获取线程上下文 context
 
 存储 context中的原EIP并更新 EIP
- ```c
+
+```c
 oldEip = context.Eip;
 context = (DWORD)remoteShellCode;
 context.ContextFlags = CONTEXT_CONTROL;
@@ -181,7 +187,3 @@ PROCESS\_ALL\_ACCESS包括以下 **等** 特定权限：
 
 目前为止，驱动可以防御住所有的用户层 针对特定进程的 dll 注入行为
 
-<!--stackedit_data:
-eyJoaXN0b3J5IjpbLTE2OTE2NDI3ODYsLTkyNTAyMjI4LC02Mz
-gxNjgyNzYsLTgyODcxMDQ2XX0=
--->

@@ -1,4 +1,5 @@
-# re.sub
+# re.sub\(pattern, repl, string, count=0, flags=0 \)
+
 ## re.sub\(pattern, repl, string, count=0, flags=0 \)
 
 ## Use function as repl
@@ -30,6 +31,3 @@ def replace(m):
 'UPPER SNAKE, lower snake, Mixed Snake'
 ```
 
-<!--stackedit_data:
-eyJoaXN0b3J5IjpbMTk4NjEwOTA3M119
--->
