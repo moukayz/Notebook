@@ -16,8 +16,13 @@
   * [主要工作](mouka/driverdevelopment/20180709.md)
 * [Python](mouka/python/README.md)
   * [re.sub\(pattern, repl, string, count=0, flags=0 \)](mouka/python/re_sub_function.md)
+* [WindowsInternal](windowsinternal/README.md)
+  * [SSDT\(Shadow\) Hook](windowsinternal/ssdt-hook.md)
 
 ## Honey
 
 * [Untitled](honey/untitled.md)
 
+<!--stackedit_data:
+eyJoaXN0b3J5IjpbLTI5MDAzMjk4NF19
+-->
