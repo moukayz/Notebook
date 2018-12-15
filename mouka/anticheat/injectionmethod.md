@@ -46,7 +46,8 @@ CreateRemoteThread(
       (LPTHREAD_START_ROUTINE)loadLibraryAddr, 
       // 执行函数的参数（此处是 需要载入的dll路径）
       remoteDllPath,
-      NULL,NULL    )    ```
+      NULL,NULL    )    
+   ```
 
    **通过该方法创建的线程，其创建进程和父进程均为 目标进程 ！**
 
@@ -54,14 +55,14 @@ CreateRemoteThread(
 
 ### 2.5  Reflective Dll Injection
 
-> 该方法依然使用线程创建函数在目标进程中创建线程， 但不是通过使线程执行 LoadLibrary 来载入线程
->
-> 具体过程比较复杂，简述如下：
->
-> 1. 将需要载入的dll的文件内容读入内存中（读入其二进制代码）
-> 2. 搜索其PE头，查找该dll 的入口地址（EntryPoint：DllMain）  **（关键一步）**
-> 3. 将其入口地址（DllMain）直接作为 线程创建函数的线程起始地址（lpStartAddress\)
-> 4. 创建远程线程
+该方法依然使用线程创建函数在目标进程中创建线程， 但不是通过使线程执行 LoadLibrary 来载入线程
+
+具体过程比较复杂，简述如下：
+
+1. 将需要载入的dll的文件内容读入内存中（读入其二进制代码）
+2. 搜索其PE头，查找该dll 的入口地址（EntryPoint：DllMain）  **（关键一步）**
+3. 将其入口地址（DllMain）直接作为 线程创建函数的线程起始地址（lpStartAddress\)
+4. 创建远程线程
 
 ### 3. QueueUserApc 方法
 
@@ -170,5 +171,5 @@ PROCESS\_ALL\_ACCESS包括以下 **等** 特定权限：
 目前为止，驱动可以防御住所有的用户层 针对特定进程的 dll 注入行为
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbODY1MzUyMTQ1XX0=
+eyJoaXN0b3J5IjpbMTM4NDI5Mjg3OV19
 -->
