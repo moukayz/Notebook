@@ -40,19 +40,21 @@ HANDLE CreateRemoteThread(
 	remoteDllAddr = VirtualAllcoEx (targetProcess, NULL, str(myDllPath)+1, MEM_COMMIT | MEM_READWRITE)
 	```
 3. 将dll路径 写入目标进程空间
-4. 
-WriteProcesMemory(targetProcess, remoteDllAddr, (LPVOID)myDllPath, strlen(myDllPath)+1, NULL) // 
-
-CreateRemoteThread(
-      targetProcess,    // 目标进程
-      NULL,
-      0,
-      // 线程的执行函数（此处是LoadLibrary)
-      (LPTHREAD_START_ROUTINE)loadLibraryAddr, 
-      // 执行函数的参数（此处是 需要载入的dll路径）
-      remoteDllPath,
-      NULL,NULL    )    
-   ```
+	```c
+	WriteProcesMemory(targetProcess, remoteDllAddr, (LPVOID)myDllPath, strlen(myDllPath)+1, NULL)  
+	```
+4. 创建远程线程
+	```c
+	CreateRemoteThread(
+	      targetProcess,    // 目标进程
+	      NULL,
+	      0,
+	      // 线程的执行函数（此处是LoadLibrary)
+	      (LPTHREAD_START_ROUTINE)loadLibraryAddr, 
+	      // 执行函数的参数（此处是 需要载入的dll路径）
+	      remoteDllPath,
+	      NULL,NULL    )    
+	   ```
 
    **通过该方法创建的线程，其创建进程和父进程均为 目标进程 ！**
 
@@ -171,5 +173,5 @@ PROCESS\_ALL\_ACCESS包括以下 **等** 特定权限：
 目前为止，驱动可以防御住所有的用户层 针对特定进程的 dll 注入行为
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTg0MjM3MTAxMF19
+eyJoaXN0b3J5IjpbMTY5Njg1Mzk5MF19
 -->
