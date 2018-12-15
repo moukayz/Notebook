@@ -95,20 +95,22 @@ DWORD QueueUserAPC(
 
   **（写入内容实际是汇编代码对应的机器码）**
 
-	```c
-     // 0xAAAAAAAA 为占位符，以后会被替换   
-     unsigned char shellcode[] =   {
-      0x68, 0xef, 0xbe, 0xad, 0xde,        // push 0xAAAAAAAA, 将原EIP值压栈
-      0x9c,                              // pushfd，通用寄存器压栈
-      0x60,                              // pushad，标志寄存器压栈
-      0x68, 0xef, 0xbe, 0xad, 0xde,        // push 0xAAAAAAAA， 将dll路径压栈（传参）
-      0xb8, 0xef, 0xbe, 0xad, 0xde,        // mov eax, 0xAAAAAAAA 
-      0xff, 0xd0,                          // call eax， 调用 LoadLibrary
-      0x61,                             // popad
-      0x9d,                             //popfd
-      0xc3                             //ret   };   ```
+```c
+// 0xAAAAAAAA 为占位符，以后会被替换   
+unsigned char shellcode[] =   {
+	 0x68, 0xef, 0xbe, 0xad, 0xde,        // push 0xAAAAAAAA, 将原EIP值压栈
+	 0x9c,                              // pushfd，通用寄存器压栈
+	 0x60,                              // pushad，标志寄存器压栈
+	 0x68, 0xef, 0xbe, 0xad, 0xde,        // push 0xAAAAAAAA， 将dll路径压栈（传参）
+	 0xb8, 0xef, 0xbe, 0xad, 0xde,        // mov eax, 0xAAAAAAAA 
+	 0xff, 0xd0,                          // call eax， 调用 LoadLibrary
+	 0x61,                             // popad
+	 0x9d,                             //popfd
+	 0xc3                             //ret   
+	 };
+   ```
 
-* 注入流程简述如下：
+注入流程简述如下：
   1. 获取 LoadLibrary 内存地址 - loadLibraryAddr
   2. 在目标进程中申请内存，将dll路径写入 - remoteDllAddr
   3. 在目标进程中申请内存，用于保存shellcode - remoteShellcodeAddr
@@ -176,5 +178,5 @@ PROCESS\_ALL\_ACCESS包括以下 **等** 特定权限：
 目前为止，驱动可以防御住所有的用户层 针对特定进程的 dll 注入行为
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTE3MzU4NDE0MTgsLTgyODcxMDQ2XX0=
+eyJoaXN0b3J5IjpbMTk5NjEzNTYxNiwtODI4NzEwNDZdfQ==
 -->
