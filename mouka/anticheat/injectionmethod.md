@@ -73,8 +73,9 @@ DWORD QueueUserAPC(
 );
 ```
 
-* 该方法和 CreateRemoteThread 类似，将实现注入功能的函数（pfnAPC）加入目标线程的 APC 队列中，当目标线程（hThread）通过 SleepEx、WaitForSingleObject 、WaitForMultipleObject 等过程 **变为 Alertable 状态** 时，该线程将依次调用其APC队列中的函数，并以dwData作为传入参数，以此实现dll注入
-* 和 CreateRemoteThread相同，pfnAPC 指向 LoadLibrary 的内存地址，dwData则为需要注入的dll的 路径
+该方法和 CreateRemoteThread 类似，将实现注入功能的函数（pfnAPC）加入目标线程的 APC 队列中，当目标线程（hThread）通过 SleepEx、WaitForSingleObject 、WaitForMultipleObject 等过程 **变为 Alertable 状态** 时，该线程将依次调用其APC队列中的函数，并以dwData作为传入参数，以此实现dll注入
+
+和 CreateRemoteThread相同，pfnAPC 指向 LoadLibrary 的内存地址，dwData则为需要注入的dll的 路径
 
   **（目标线程的状态必须为 Alertable，否则不会执行 APC ）**
 
@@ -169,5 +170,5 @@ PROCESS\_ALL\_ACCESS包括以下 **等** 特定权限：
 目前为止，驱动可以防御住所有的用户层 针对特定进程的 dll 注入行为
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTg5NDk5MTMwNV19
+eyJoaXN0b3J5IjpbODY1MzUyMTQ1XX0=
 -->
