@@ -31,12 +31,17 @@ HANDLE CreateRemoteThread(
 ```
 
 该方法在CreateRemoteThread 在目标进程中创建一个线程，再通过 新创建的线程进行dll注入 
-```c    
-loadLibraryAddr = GetProcAddress(GetModuleHandle("kernel32.dll"), "LoadLibraryA") // 获取函数 LoadLibrary 在内存中的地址
-
-remoteDllAddr = VirtualAllcoEx (targetProcess, NULL, str(myDllPath)+1, MEM_COMMIT | MEM_READWRITE) // 在目标进程空间给将要注入的dll路径字符串（形如“c:\my.dll”）分配空间
-
-WriteProcesMemory(targetProcess, remoteDllAddr, (LPVOID)myDllPath, strlen(myDllPath)+1, NULL) // 将dll路径 写入目标进程空间
+1. 获取函数 LoadLibrary 在内存中的地址
+	```c    
+	loadLibraryAddr = GetProcAddress(GetModuleHandle("kernel32.dll"), "LoadLibraryA")
+	``` 
+2.  在目标进程空间给将要注入的dll路径字符串（形如“c:\my.dll”）分配空间
+	```c
+	remoteDllAddr = VirtualAllcoEx (targetProcess, NULL, str(myDllPath)+1, MEM_COMMIT | MEM_READWRITE)
+	```
+3. 将dll路径 写入目标进程空间
+4. 
+WriteProcesMemory(targetProcess, remoteDllAddr, (LPVOID)myDllPath, strlen(myDllPath)+1, NULL) // 
 
 CreateRemoteThread(
       targetProcess,    // 目标进程
@@ -166,5 +171,5 @@ PROCESS\_ALL\_ACCESS包括以下 **等** 特定权限：
 目前为止，驱动可以防御住所有的用户层 针对特定进程的 dll 注入行为
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTc3MzU0NDY4MV19
+eyJoaXN0b3J5IjpbMTg0MjM3MTAxMF19
 -->
