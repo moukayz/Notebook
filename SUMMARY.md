@@ -26,6 +26,12 @@
     * [一次检查多个标志](mouka/python/python-tricks/yi-ci-jian-cha-duo-ge-biao-zhi.md)
     * [合并两个字典](mouka/python/python-tricks/he-bing-liang-ge-zi-dian.md)
     * [re.sub使用替换函数](mouka/python/python-tricks/re_sub_function.md)
+* [Algorithms](mouka/algorithms/README.md)
+  * [Greedy](mouka/algorithms/greedy/README.md)
+    * [使括号平衡的最小交换次数](mouka/algorithms/greedy/shi-kuo-hao-ping-heng-de-zui-xiao-jiao-huan-ci-shu.md)
+    * [埃及分数](mouka/algorithms/greedy/ai-ji-fen-shu.md)
+  * [DynamicProgramming](mouka/algorithms/dynamicprogramming/README.md)
+    * [0-1 背包问题](mouka/algorithms/dynamicprogramming/01-bei-bao-wen-ti.md)
 
 ## Honey
 
