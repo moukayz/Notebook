@@ -89,12 +89,15 @@ DWORD QueueUserAPC(
 
 ### 4. SetThreadContext 方法
 
-* 该方法原理是 通过 SetThreadContext 函数更改 目标进程上下文中的指令指针（EIP for x86），跳转到目标进程中我们写入的内存区域，并开始执行，以此实现dll注入或任意代码执行。
-* 由于该方法无法传递参数，因此需要在目标进程中写入一段 汇编代码 用于处理参数并调用 LoadLibrary，然后将EIP指向该段代码起始地址，汇编码如下所示：
+该方法原理是 通过 SetThreadContext 函数更改 目标进程上下文中的指令指针（EIP for x86），跳转到目标进程中我们写入的内存区域，并开始执行，以此实现dll注入或任意代码执行。
+
+由于该方法无法传递参数，因此需要在目标进程中写入一段 汇编代码 用于处理参数并调用 LoadLibrary，然后将EIP指向该段代码起始地址，汇编码如下所示：
 
   **（写入内容实际是汇编代码对应的机器码）**
 
-  ```c   // 0xAAAAAAAA 为占位符，以后会被替换   unsigned char shellcode[] =   {
+	```c
+     // 0xAAAAAAAA 为占位符，以后会被替换   
+     unsigned char shellcode[] =   {
       0x68, 0xef, 0xbe, 0xad, 0xde,        // push 0xAAAAAAAA, 将原EIP值压栈
       0x9c,                              // pushfd，通用寄存器压栈
       0x60,                              // pushad，标志寄存器压栈
@@ -173,5 +176,5 @@ PROCESS\_ALL\_ACCESS包括以下 **等** 特定权限：
 目前为止，驱动可以防御住所有的用户层 针对特定进程的 dll 注入行为
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTgyODcxMDQ2XX0=
+eyJoaXN0b3J5IjpbLTE3MzU4NDE0MTgsLTgyODcxMDQ2XX0=
 -->
