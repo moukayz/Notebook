@@ -111,6 +111,7 @@ unsigned char shellcode[] =   {
    ```
 
 注入流程简述如下：
+
 获取 LoadLibrary 内存地址 - loadLibraryAddr
 在目标进程中申请内存，将dll路径写入 - remoteDllAddr
 在目标进程中申请内存，用于保存shellcode - remoteShellcodeAddr
@@ -135,14 +136,14 @@ memcpy((void*)(shellcode + 13, &loadLibraryAddr));
 
 将shellcode写入目标进程并开始执行
 
-     ```c
-     // 写入shellcode
-     WriteProcessMemory(targetProcess, remoteShellcodeAddr, shellcode, NULL);
-     // 更改线程上下文
-     SetThreadContext(targetThread, &context);
-     // 恢复执行
-     ResumeThread(targetThread);
-     ```
+```c
+// 写入shellcode
+WriteProcessMemory(targetProcess, remoteShellcodeAddr, shellcode, NULL);
+// 更改线程上下文
+SetThreadContext(targetThread, &context);
+// 恢复执行
+ResumeThread(targetThread);
+```
 
 ## 总结
 
@@ -178,6 +179,6 @@ PROCESS\_ALL\_ACCESS包括以下 **等** 特定权限：
 目前为止，驱动可以防御住所有的用户层 针对特定进程的 dll 注入行为
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTIxMTE4NTg2NzYsLTkyNTAyMjI4LC02Mz
-gxNjgyNzYsLTgyODcxMDQ2XX0=
+eyJoaXN0b3J5IjpbLTY0OTU5NTc3NiwtOTI1MDIyMjgsLTYzOD
+E2ODI3NiwtODI4NzEwNDZdfQ==
 -->
