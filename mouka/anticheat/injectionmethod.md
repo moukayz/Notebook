@@ -82,60 +82,55 @@ DWORD QueueUserAPC(
 
 ### 4. SetThreadContext 方法
 
-> * 该方法原理是 通过 SetThreadContext 函数更改 目标进程上下文中的指令指针（EIP for x86），跳转到目标进程中我们写入的内存区域，并开始执行，以此实现dll注入或任意代码执行。
-> * 由于该方法无法传递参数，因此需要在目标进程中写入一段 汇编代码 用于处理参数并调用 LoadLibrary，然后将EIP指向该段代码起始地址，汇编码如下所示：
->
->   **（写入内容实际是汇编代码对应的机器码）**
->
->   ```c
->   // 0xAAAAAAAA 为占位符，以后会被替换
->   unsigned char shellcode[] =
->   {
->       0x68, 0xef, 0xbe, 0xad, 0xde,        // push 0xAAAAAAAA, 将原EIP值压栈
->       0x9c,                              // pushfd，通用寄存器压栈
->       0x60,                              // pushad，标志寄存器压栈
->       0x68, 0xef, 0xbe, 0xad, 0xde,        // push 0xAAAAAAAA， 将dll路径压栈（传参）
->       0xb8, 0xef, 0xbe, 0xad, 0xde,        // mov eax, 0xAAAAAAAA 
->       0xff, 0xd0,                          // call eax， 调用 LoadLibrary
->       0x61,                             // popad
->       0x9d,                             //popfd
->       0xc3                             //ret
->   };
->   ```
->
-> * 注入流程简述如下：
->   1. 获取 LoadLibrary 内存地址 - loadLibraryAddr
->   2. 在目标进程中申请内存，将dll路径写入 - remoteDllAddr
->   3. 在目标进程中申请内存，用于保存shellcode - remoteShellcodeAddr
->   4. 使用 `SuspendThread(htargetThread)` 挂起目标线程，并使用`GetThreadContext(targetThread, &context)` 获取线程上下文 context
->   5. 存储 context中的原EIP并更新 EIP
->
->      ```c
->      oldEip = context.Eip;
->      context = (DWORD)remoteShellCode;
->      context.ContextFlags = CONTEXT_CONTROL;
->      ```
->
->   6. 替换 shellcode中的相关地址参数
->
->      ```c
->      // 修改内存页为可写可执行属性
->      VirtualProtect(shellcode, sizeof(shellcode), PAGE_EXECUTE_READWRITE, &oldProtect);
->      memcpy((void*)(shellcode + 1), &oldEip);    
->      memcpy((void*)(shellcode + 8), &remoteDllAddr);
->      memcpy((void*)(shellcode + 13, &loadLibraryAddr));
->      ```
->
->   7. 将shellcode写入目标进程并开始执行
->
->      ```c
->      // 写入shellcode
->      WriteProcessMemory(targetProcess, remoteShellcodeAddr, shellcode, NULL);
->      // 更改线程上下文
->      SetThreadContext(targetThread, &context);
->      // 恢复执行
->      ResumeThread(targetThread);
->      ```
+* 该方法原理是 通过 SetThreadContext 函数更改 目标进程上下文中的指令指针（EIP for x86），跳转到目标进程中我们写入的内存区域，并开始执行，以此实现dll注入或任意代码执行。
+* 由于该方法无法传递参数，因此需要在目标进程中写入一段 汇编代码 用于处理参数并调用 LoadLibrary，然后将EIP指向该段代码起始地址，汇编码如下所示：
+
+  **（写入内容实际是汇编代码对应的机器码）**
+
+  ```c   // 0xAAAAAAAA 为占位符，以后会被替换   unsigned char shellcode[] =   {
+      0x68, 0xef, 0xbe, 0xad, 0xde,        // push 0xAAAAAAAA, 将原EIP值压栈
+      0x9c,                              // pushfd，通用寄存器压栈
+      0x60,                              // pushad，标志寄存器压栈
+      0x68, 0xef, 0xbe, 0xad, 0xde,        // push 0xAAAAAAAA， 将dll路径压栈（传参）
+      0xb8, 0xef, 0xbe, 0xad, 0xde,        // mov eax, 0xAAAAAAAA 
+      0xff, 0xd0,                          // call eax， 调用 LoadLibrary
+      0x61,                             // popad
+      0x9d,                             //popfd
+      0xc3                             //ret   };   ```
+
+* 注入流程简述如下：
+  1. 获取 LoadLibrary 内存地址 - loadLibraryAddr
+  2. 在目标进程中申请内存，将dll路径写入 - remoteDllAddr
+  3. 在目标进程中申请内存，用于保存shellcode - remoteShellcodeAddr
+  4. 使用 `SuspendThread(htargetThread)` 挂起目标线程，并使用`GetThreadContext(targetThread, &context)` 获取线程上下文 context
+  5. 存储 context中的原EIP并更新 EIP
+
+     ```c
+     oldEip = context.Eip;
+     context = (DWORD)remoteShellCode;
+     context.ContextFlags = CONTEXT_CONTROL;
+     ```
+
+  6. 替换 shellcode中的相关地址参数
+
+     ```c
+     // 修改内存页为可写可执行属性
+     VirtualProtect(shellcode, sizeof(shellcode), PAGE_EXECUTE_READWRITE, &oldProtect);
+     memcpy((void*)(shellcode + 1), &oldEip);    
+     memcpy((void*)(shellcode + 8), &remoteDllAddr);
+     memcpy((void*)(shellcode + 13, &loadLibraryAddr));
+     ```
+
+  7. 将shellcode写入目标进程并开始执行
+
+     ```c
+     // 写入shellcode
+     WriteProcessMemory(targetProcess, remoteShellcodeAddr, shellcode, NULL);
+     // 更改线程上下文
+     SetThreadContext(targetThread, &context);
+     // 恢复执行
+     ResumeThread(targetThread);
+     ```
 
 ## 总结
 
@@ -171,5 +166,5 @@ PROCESS\_ALL\_ACCESS包括以下 **等** 特定权限：
 目前为止，驱动可以防御住所有的用户层 针对特定进程的 dll 注入行为
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTM4NDI5Mjg3OV19
+eyJoaXN0b3J5IjpbMTc3MzU0NDY4MV19
 -->
