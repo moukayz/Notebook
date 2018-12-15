@@ -1,4 +1,4 @@
-# re.sub
+# re.sub使用替换函数
 
 ## re.sub\(pattern, repl, string, count=0, flags=0 \)
 

@@ -13,7 +13,19 @@
   * [20180625](mouka/driverdevelopment/20180625.md)
   * [20180626-27](mouka/driverdevelopment/20180626-27.md)
 * [Python](mouka/python/README.md)
-  * [re.sub](mouka/python/re_sub_function.md)
+  * [Python Tricks](mouka/python/python-tricks/README.md)
+    * [函数作为变量](mouka/python/python-tricks/han-shu-zuo-wei-bian-liang.md)
+    * ["is" vs "=="](mouka/python/python-tricks/is-vs.md)
+    * [直接变量值交换](mouka/python/python-tricks/zhi-jie-bian-liang-zhi-jiao-huan.md)
+    * [计算代码执行时间](mouka/python/python-tricks/ji-suan-dai-ma-zhi-hang-shi-jian.md)
+    * [函数参数分解](mouka/python/python-tricks/han-shu-can-shu-fen-jie.md)
+    * [打印Python字典](mouka/python/python-tricks/da-yin-python-zi-dian.md)
+    * [命名元组代替class](mouka/python/python-tricks/ming-ming-yuan-zu-dai-ti-class.md)
+    * [get\(\)方法访问字典](mouka/python/python-tricks/get-fang-fa-fang-wen-zi-dian.md)
+    * [字典排序](mouka/python/python-tricks/zi-dian-pai-xu.md)
+    * [一次检查多个标志](mouka/python/python-tricks/yi-ci-jian-cha-duo-ge-biao-zhi.md)
+    * [合并两个字典](mouka/python/python-tricks/he-bing-liang-ge-zi-dian.md)
+    * [re.sub使用替换函数](mouka/python/python-tricks/re_sub_function.md)
 
 ## Honey
 
