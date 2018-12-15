@@ -1,6 +1,6 @@
-# re.sub(*pattern*, *repl*, *string*, *count=0*, *flags=0* ) 
+# re.sub\(pattern, repl, string, count=0, flags=0 \)
 
-### Use function as repl
+## Use function as repl
 
 ```python
 >>> text = 'UPPER PYTHON, lower python, Mixed Python'
@@ -14,7 +14,7 @@ function will receive a match object as input parameter
 
 ```python
 def replace(m):
-    	word = 'snake'
+        word = 'snake'
         text = m.group()
         if text.isupper():
             return word.upper()

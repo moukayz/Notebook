@@ -1,8 +1,6 @@
-# SSDT(Shadow) Hook
+# SSDT\(Shadow\) Hook
 
-[TOC]
-
-
+\[TOC\]
 
 ## Basic struct
 
@@ -20,13 +18,13 @@ struct SSDTStruct
 };
 ```
 
-## Find SSDT(Shadow) base address
+## Find SSDT\(Shadow\) base address
 
 ### x86
 
 **SSDT:**
 
-```assembly
+```text
 1: kd> dps nt!KeServiceDescriptorTable
 83f86b00  83e7ccbc nt!KiServiceTable
 83f86b04  00000000
@@ -44,7 +42,7 @@ struct SSDTStruct
 83f86b34  841514f4 nt!KdpTrap
 83f86b38  83ef1f63 nt!KdpSwitchProcessor
 83f86b3c  00000000
-83f86b40  83e7ccbc nt!KiServiceTable	# KeServiceDescriptorTableShadow is here !!!
+83f86b40  83e7ccbc nt!KiServiceTable    # KeServiceDescriptorTableShadow is here !!!
 83f86b44  00000000
 83f86b48  00000191
 83f86b4c  83e7d304 nt!KiArgumentTable
@@ -54,19 +52,19 @@ struct SSDTStruct
 83f86b5c  9be5902c win32k!W32pArgumentTable
 
 1: kd> dd /c 1 nt!KiServiceTable l2
-83e7ccbc  84098ffa	# Function offset
+83e7ccbc  84098ffa    # Function offset
 83e7ccc0  83ed5217
 ```
 
 **SSDT Shadow:**
 
-```assembly
+```text
 1: kd> dps nt!KeServiceDescriptorTableShadow
-83f86b40  83e7ccbc nt!KiServiceTable	# SSDT 
+83f86b40  83e7ccbc nt!KiServiceTable    # SSDT 
 83f86b44  00000000
 83f86b48  00000191
 83f86b4c  83e7d304 nt!KiArgumentTable
-83f86b50  9be58000 win32k!W32pServiceTable	# SSDT Shadow
+83f86b50  9be58000 win32k!W32pServiceTable    # SSDT Shadow
 83f86b54  00000000
 83f86b58  00000339
 83f86b5c  9be5902c win32k!W32pArgumentTable
@@ -76,9 +74,9 @@ struct SSDTStruct
 9be58004  9bdfa31b
 ```
 
-**Before dump SSDT Shadow, you have to attach to any user-mode process (like winlogon.exe)**
+**Before dump SSDT Shadow, you have to attach to any user-mode process \(like winlogon.exe\)**
 
-```assembly
+```text
 1: kd> !process 0 0 winlogon.exe
 PROCESS 882d3d20  SessionId: 1  Cid: 01d4    Peb: 7ffdc000  ParentCid: 0188
     DirBase: bf153080  ObjectTable: 9b33f300  HandleCount:  55.
@@ -105,7 +103,7 @@ RtlInitUnicodeString(&routineName, L"KeServiceDescriptorTable");
 pServiceDescriptorTable = (SSDTStruct*)MmGetSystemRoutineAddress(&routineName);
 ```
 
-Then we can get the address of **nt!KeServiceDescriptorTableShadow** by add the offset (like previously windbg shows)
+Then we can get the address of **nt!KeServiceDescriptorTableShadow** by add the offset \(like previously windbg shows\)
 
 ```c
 pServiceDescriptorTableShadow = (PVOID)((ULONG_PTR)pServiceDescriptorTable + 0x40)
@@ -122,15 +120,15 @@ pW32kTable = (PVOID)((ULONG_PTR)pServiceDescriptorTable + 0x10)
 
 **SSDT:**
 
-```assembly
+```text
 1: kd> dps nt!KeServiceDescriptorTable
-fffff800`040c7840  fffff800`03e97300 nt!KiServiceTable	# SSDT base address
+fffff800`040c7840  fffff800`03e97300 nt!KiServiceTable    # SSDT base address
 fffff800`040c7848  00000000`00000000
 fffff800`040c7850  00000000`00000191
 fffff800`040c7858  fffff800`03e97f8c nt!KiArgumentTable
 
 1: kd> dd /c 1 nt!KiServiceTable l10
-fffff800`03e97300  040d9a00	# Function offset
+fffff800`03e97300  040d9a00    # Function offset
 fffff800`03e97304  02f55c00
 fffff800`03e97308  fff6ea00
 fffff800`03e9730c  02e87805
@@ -150,19 +148,19 @@ fffff800`03e9733c  02d96100
 
 **SSDT Shadow:**
 
-```assembly
+```text
 1: kd> dps nt!KeServiceDescriptorTableShadow
-fffff800`040c7880  fffff800`03e97300 nt!KiServiceTable		# SSDT base address
+fffff800`040c7880  fffff800`03e97300 nt!KiServiceTable        # SSDT base address
 fffff800`040c7888  00000000`00000000
 fffff800`040c7890  00000000`00000191
 fffff800`040c7898  fffff800`03e97f8c nt!KiArgumentTable
-fffff800`040c78a0  fffff960`00111f00 win32k!W32pServiceTable	# SSDT Shadow base address
+fffff800`040c78a0  fffff960`00111f00 win32k!W32pServiceTable    # SSDT Shadow base address
 fffff800`040c78a8  00000000`00000000
 fffff800`040c78b0  00000000`0000033b
 fffff800`040c78b8  fffff960`00113c1c win32k!W32pArgumentTable
 
 1: kd> dd /c 1 win32k!W32pServiceTable l10
-fffff960`00111f00  fff3a740		# GDI Function offset
+fffff960`00111f00  fff3a740        # GDI Function offset
 fffff960`00111f04  fff0b501
 fffff960`00111f08  000206c0
 fffff960`00111f0c  001021c0
@@ -180,9 +178,9 @@ fffff960`00111f38  000e8bc0
 fffff960`00111f3c  fffeb300
 ```
 
-**Before dump SSDT Shadow, you have to attach to any user-mode process (like winlogon.exe)**
+**Before dump SSDT Shadow, you have to attach to any user-mode process \(like winlogon.exe\)**
 
-```assembly
+```text
 1: kd> !process 0 0 winlogon.exe
 PROCESS fffffa80042a8b30
     SessionId: 1  Cid: 01ec    Peb: 7fffffde000  ParentCid: 0198
@@ -206,7 +204,7 @@ readAddress = (ntTable[FunctionIndex >> 4]) + SSDT(Shadow)BaseAddress;
 
 Find **nt!KeServiceDescriptorTable** and **nt!KeServiceDescriptorTableShadow** in kernel function **nt!KiSystemServiceStart**
 
-```assembly
+```text
 0: kd> u nt!KiSystemServiceStart
 nt!KiSystemServiceStart:
 fffff800`03e9575e 4889a3d8010000  mov     qword ptr [rbx+1D8h],rsp
@@ -216,10 +214,10 @@ fffff800`03e9576a 83e720          and     edi,20h
 fffff800`03e9576d 25ff0f0000      and     eax,0FFFh
 nt!KiSystemServiceRepeat:
 fffff800`03e95772 4c8d15c7202300  lea     r10,[nt!KeServiceDescriptorTable (fffff800`040c7840)]
-fffff800`03e95779 4c8d1d00212300  lea     r11,[nt!KeServiceDescriptorTableShadow 
+fffff800`03e95779 4c8d1d00212300  lea     r11,[nt!KeServiceDescriptorTableShadow
 ```
 
-So search the whole kernel address from the kernel base for **KiSystemServiceStart** 's pattern 
+So search the whole kernel address from the kernel base for **KiSystemServiceStart** 's pattern
 
 ```c
 const unsigned char KiSystemServiceStartPattern[] = { 0x8B, 0xF8, 0xC1, 0xEF, 0x07, 0x83, 0xE7, 0x20, 0x25, 0xFF, 0x0F, 0x00, 0x00 };
@@ -241,8 +239,8 @@ if(!found)
 
 After find the target function, we can retrieve the address of **nt!KeServiceDescriptorTableShadow** in the instruction:
 
-```assembly
-4c8d1d00212300  lea     r11,[nt!KeServiceDescriptorTableShadow 
+```text
+4c8d1d00212300  lea     r11,[nt!KeServiceDescriptorTableShadow
 ```
 
 ```c
@@ -262,7 +260,7 @@ if(relativeOffset == 0)
 SSDTStruct* shadow = (SSDTStruct*)( address + relativeOffset + 7 );
 ```
 
-Then we can get the addresses of **nt!KiServiceTable(SSDT)** and **win32k!W32pServiceTable(SSDT Shadow)**
+Then we can get the addresses of **nt!KiServiceTable\(SSDT\)** and **win32k!W32pServiceTable\(SSDT Shadow\)**
 
 ```c
 PVOID ntTable = (PVOID)shadow;
@@ -271,7 +269,7 @@ PVOID win32kTable = (PVOID)((ULONG_PTR)shadow + 0x20);
 
 ## Find the base address of ntoskrnl.exe and win32k.sys
 
-First, we use the undocumented function **ZwQuerySystemInformation** with parameter of ***SystemModuleInformation***  to get information of system modules
+First, we use the undocumented function **ZwQuerySystemInformation** with parameter of _**SystemModuleInformation**_ to get information of system modules
 
 ```c
 // Get SystemInfo size first
@@ -288,7 +286,7 @@ status = ZwQuerySystemInformation(SystemModuleInformation,
              &SystemInfoBufferSize);
 ```
 
-while the struct of **SYSTEM_MODULE_INFORMATION** is
+while the struct of **SYSTEM\_MODULE\_INFORMATION** is
 
 ```c
 typedef struct _SYSTEM_MODULE_INFORMATION
@@ -318,7 +316,7 @@ Usually the module **ntoskrnl.exe** is always the first module in the buffer, wh
 PVOID ntBase = pSystemInfoBuffer->Module[0].ImageBase;
 ```
 
-But the position of **win32k.sys** in the buffer is not sure, so we have to traverse the buffer to find it by compare the **FullPathName** field of  each **SYSTEM_MODULE_ENTRY**  with **"win32k.sys"**
+But the position of **win32k.sys** in the buffer is not sure, so we have to traverse the buffer to find it by compare the **FullPathName** field of each **SYSTEM\_MODULE\_ENTRY** with **"win32k.sys"**
 
 ```c
 PSYSTEM_MODULE_ENTRY moduleInfo = pSystemInfoBuffer->Module;
@@ -334,23 +332,23 @@ while ( TRUE )
         PVOID win32kBase = moduleInfo->ImageBase;
         break;
     }
-    moduleInfo = moduleInfo + 1;	// Iterate to next module entry
+    moduleInfo = moduleInfo + 1;    // Iterate to next module entry
 }
 ```
 
 ## Find SSDT function index by function name
 
-####Index in ntdll.dll
+#### Index in ntdll.dll
 
-Almost all SSDT function have a stub function which has the same name and is exported by **NTDLL.DLL** 
+Almost all SSDT function have a stub function which has the same name and is exported by **NTDLL.DLL**
 
-eg. the first few lines of user-mode function **NtCreateFile** exported by  NTDLL.DLL (*You have to attach to user-mode process to view symbols in ntdll*)
+eg. the first few lines of user-mode function **NtCreateFile** exported by NTDLL.DLL \(_You have to attach to user-mode process to view symbols in ntdll_\)
 
-```assembly
+```text
 0: kd> u ntdll!NtCreateFile
 ntdll!ZwCreateFile:
 00000000`774d1860 4c8bd1          mov     r10,rcx
-00000000`774d1863 b852000000      mov     eax,52h		# This is the SSDT index 
+00000000`774d1863 b852000000      mov     eax,52h        # This is the SSDT index 
 00000000`774d1868 0f05            syscall
 00000000`774d186a c3              ret
 00000000`774d186b 0f1f440000      nop     dword ptr [rax+rax]
@@ -358,8 +356,8 @@ ntdll!ZwCreateFile:
 
 As above shows, `mov eax, 52h` transfers the system call number to **EAX**, and call `syscall` to trap into the kernel, then kernel will use the number `52h` to find corresponding kernel function in SSDT
 
-```assembly
-0: kd> dd /c 1 nt!KiServiceTable l53	# Function index begin from 0
+```text
+0: kd> dd /c 1 nt!KiServiceTable l53    # Function index begin from 0
 fffff800`03e97300  040d9a00
 fffff800`03e97304  02f55c00
 fffff800`03e97308  fff6ea00
@@ -370,7 +368,7 @@ fffff800`03e97438  031bab01
 fffff800`03e9743c  02efec80
 fffff800`03e97440  02d52300
 fffff800`03e97444  04637102
-fffff800`03e97448  03071007			# This is the index of nt!NtCreateFile (52h)
+fffff800`03e97448  03071007            # This is the index of nt!NtCreateFile (52h)
 
 0: kd> u FFFFF8000419E400
 nt!NtCreateFile:
@@ -403,7 +401,7 @@ if(KeGetCurrentIrql() != PASSIVE_LEVEL)
 HANDLE FileHandle;
 IO_STATUS_BLOCK IoStatusBlock;
 // Open ntdll.dll file 
-NTSTATUS NtStatus = ZwCreateFile(&FileHandle,		
+NTSTATUS NtStatus = ZwCreateFile(&FileHandle,        
                                  GENERIC_READ,
                                  &ObjectAttributes,
                                  &IoStatusBlock, NULL,
@@ -437,9 +435,9 @@ if(NT_SUCCESS(NtStatus))
 }
 ```
 
-Then get the real function address of any exported function . 
+Then get the real function address of any exported function .
 
-To do this, we have to get its **Export Address Table** from its **PE header** 
+To do this, we have to get its **Export Address Table** from its **PE header**
 
 ```c
  //Verify DOS Header
@@ -468,7 +466,7 @@ USHORT* AddressOfNameOrdinals = (USHORT*)(FileData + AddressOfNameOrdinalsOffset
 ULONG* AddressOfNames = (ULONG*)(FileData + AddressOfNamesOffset);
 ```
 
- and get the file offset of the function address from its name 
+and get the file offset of the function address from its name
 
 ```c
 // Find RVA of exported function whose name is ExportName
@@ -492,20 +490,20 @@ for(ULONG i = 0; i < NumberOfNames; i++)
 }
 ```
 
-Then get the real address of exported function in memory ( in ntdll.dll )
+Then get the real address of exported function in memory \( in ntdll.dll \)
 
 ```c
 ExportFunctionAddress = (PVOID)((ULONG_PTR)FileData + ExportOffset)
 ```
 
-finally search the whole function for pattern `mov eax, xx`,  retrieve the SSDT index 
+finally search the whole function for pattern `mov eax, xx`, retrieve the SSDT index
 
 ```c
 for(int i = 0; i < 32 && ExportOffset + i < FileSize; i++)
 {
     if(ExportData[i] == 0xC2 || ExportData[i] == 0xC3)  //RET
         break;
-    if(ExportData[i] == 0xB8)  //mov eax,XX	-- b8 FFFFFFFF
+    if(ExportData[i] == 0xB8)  //mov eax,XX    -- b8 FFFFFFFF
     {
         SsdtOffset = *(int*)(ExportData + i + 1);
         break;
@@ -513,7 +511,7 @@ for(int i = 0; i < 32 && ExportOffset + i < FileSize; i++)
 }
 ```
 
-#### Combine index with SSDT(Shadow)
+#### Combine index with SSDT\(Shadow\)
 
 x64
 
@@ -562,10 +560,10 @@ NTSTATUS RtlSuperCopyMemory(
 }
 ```
 
-In order to unhook SSDT in future, define some hook structs as below (**HOOKOPCODES** is our shellcode for x64 hook)
+In order to unhook SSDT in future, define some hook structs as below \(**HOOKOPCODES** is our shellcode for x64 hook\)
 
 ```c
-#pragma pack(push,1)		// This is very important !!!!
+#pragma pack(push,1)        // This is very important !!!!
 struct HOOKOPCODES
 {
 #ifdef _WIN64
@@ -610,19 +608,19 @@ SuperCopyMemory(&realNtFunction, YourFunction);
 
 ### x64
 
-In x64 platform, because `realFunction = ntTable[FunctionIndex] >> 4 + ntTable`,  the only thing you can modify is the value of `ntTable[FunctionIndex]`, and it's **long** type(32 bit), which means you can only jump within the range **-2GB + ntTable ~ 2GB + ntTable**, Obviously the address is inside the **ntoskrnl.exe module address space**. So to jump to the function located in our own module, we have to make a **"indirect jump"**.
+In x64 platform, because `realFunction = ntTable[FunctionIndex] >> 4 + ntTable`, the only thing you can modify is the value of `ntTable[FunctionIndex]`, and it's **long** type\(32 bit\), which means you can only jump within the range **-2GB + ntTable ~ 2GB + ntTable**, Obviously the address is inside the **ntoskrnl.exe module address space**. So to jump to the function located in our own module, we have to make a **"indirect jump"**.
 
 Jump from SSDT to our stub function, then jump to our real function. Below is the stub shellcode
 
-```assembly
+```text
 movabs rax, xxxxxxxxxxxxxxxx ; 48B8 XXXXXXXXXXXXXXXX (move our real function to rax)
 push rax ; 50
 ret ; c3 (return to rax, which is our function)
 ```
 
-As you can see, the shellcode is only 12 bytes, so we only need to find a executable memory block which is larger than 12 bytes. Well in every code page(4KB size) there are many **nop** instruction where we can insert our shellcode, So we try to insert the shellcode into the code page where the real kernel function to be hooked is.
+As you can see, the shellcode is only 12 bytes, so we only need to find a executable memory block which is larger than 12 bytes. Well in every code page\(4KB size\) there are many **nop** instruction where we can insert our shellcode, So we try to insert the shellcode into the code page where the real kernel function to be hooked is.
 
-Get the ntoskrnl.exe's **section header**  first
+Get the ntoskrnl.exe's **section header** first
 
 ```c
 ULONG dwRva = (ULONG)((unsigned char*)realNtFunction - (unsigned char*)ntBase);
@@ -669,11 +667,11 @@ unsigned int CaveSize = sizeof(HOOKOPCODES);
 for(unsigned int i = 0, j = 0; i < CodeSize; i++)
 {
     if(Code[i] == 0x90 || Code[i] == 0xCC)  //NOP or INT3
-    	j++;
+        j++;
     else
-    	j = 0;
+        j = 0;
     if(j == CaveSize)
-    	ShellcodeCave = (PVOID)((ULONG_PTR)CodeStart + i - CaveSize + 1);
+        ShellcodeCave = (PVOID)((ULONG_PTR)CodeStart + i - CaveSize + 1);
 }
 ```
 
@@ -685,14 +683,14 @@ initialize the hook struct
 //allocate structure
 PHOOK hook = (PHOOK)RtlAllocateMemory(true, sizeof(HOOK));
 //set hooking address
-hook->addr = ShellcodeCave;		// Store the cave address
+hook->addr = ShellcodeCave;        // Store the cave address
 //set hooking opcode
 #ifdef _WIN64
 hook->hook.mov = 0xB848;
 #else
 hook->hook.mov = 0xB8;
 #endif
-hook->hook.addr = (ULONG_PTR)YourFunction;	// Insert our own function
+hook->hook.addr = (ULONG_PTR)YourFunction;    // Insert our own function
 hook->hook.push = 0x50;
 hook->hook.ret = 0xc3;
 //set original data
@@ -727,18 +725,4 @@ SuperCopyMemory(&ntTable[FunctionIndex], newOffset);
 ```
 
 **DONE!**
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
