@@ -1,4 +1,5 @@
-# 导入表、输入法dll注入
+# Inject Defense
+## 导入表、输入法dll注入
 
 * 程序启动时检查exe、dll签名及证书，
 * 用户进程内hook loadlibrary，当载入的dll不在白名单内的时候，拒绝载入
@@ -8,3 +9,6 @@
 
 对于输入法等在程序启动后进行注入的方法，可通过hook loadlibray来监控
 
+<!--stackedit_data:
+eyJoaXN0b3J5IjpbLTk1Mzk2MDE5Ml19
+-->
