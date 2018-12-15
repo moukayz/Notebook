@@ -111,29 +111,29 @@ unsigned char shellcode[] =   {
    ```
 
 注入流程简述如下：
-  1. 获取 LoadLibrary 内存地址 - loadLibraryAddr
-  2. 在目标进程中申请内存，将dll路径写入 - remoteDllAddr
-  3. 在目标进程中申请内存，用于保存shellcode - remoteShellcodeAddr
-  4. 使用 `SuspendThread(htargetThread)` 挂起目标线程，并使用`GetThreadContext(targetThread, &context)` 获取线程上下文 context
-  5. 存储 context中的原EIP并更新 EIP
+获取 LoadLibrary 内存地址 - loadLibraryAddr
+在目标进程中申请内存，将dll路径写入 - remoteDllAddr
+在目标进程中申请内存，用于保存shellcode - remoteShellcodeAddr
+使用 `SuspendThread(htargetThread)` 挂起目标线程，并使用`GetThreadContext(targetThread, &context)` 获取线程上下文 context
+存储 context中的原EIP并更新 EIP
 
-     ```c
-     oldEip = context.Eip;
-     context = (DWORD)remoteShellCode;
-     context.ContextFlags = CONTEXT_CONTROL;
-     ```
+ ```c
+oldEip = context.Eip;
+context = (DWORD)remoteShellCode;
+context.ContextFlags = CONTEXT_CONTROL;
+```
 
-  6. 替换 shellcode中的相关地址参数
+替换 shellcode中的相关地址参数
 
-     ```c
-     // 修改内存页为可写可执行属性
-     VirtualProtect(shellcode, sizeof(shellcode), PAGE_EXECUTE_READWRITE, &oldProtect);
-     memcpy((void*)(shellcode + 1), &oldEip);    
-     memcpy((void*)(shellcode + 8), &remoteDllAddr);
-     memcpy((void*)(shellcode + 13, &loadLibraryAddr));
-     ```
+```c
+// 修改内存页为可写可执行属性
+VirtualProtect(shellcode, sizeof(shellcode), PAGE_EXECUTE_READWRITE, &oldProtect);
+memcpy((void*)(shellcode + 1), &oldEip);    
+memcpy((void*)(shellcode + 8), &remoteDllAddr);
+memcpy((void*)(shellcode + 13, &loadLibraryAddr));
+```
 
-  7. 将shellcode写入目标进程并开始执行
+将shellcode写入目标进程并开始执行
 
      ```c
      // 写入shellcode
@@ -178,6 +178,6 @@ PROCESS\_ALL\_ACCESS包括以下 **等** 特定权限：
 目前为止，驱动可以防御住所有的用户层 针对特定进程的 dll 注入行为
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTUxMzQ2MCwtOTI1MDIyMjgsLTYzODE2OD
-I3NiwtODI4NzEwNDZdfQ==
+eyJoaXN0b3J5IjpbLTIxMTE4NTg2NzYsLTkyNTAyMjI4LC02Mz
+gxNjgyNzYsLTgyODcxMDQ2XX0=
 -->
