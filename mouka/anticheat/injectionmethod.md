@@ -1,4 +1,4 @@
-# InjectionMethod
+# Injection Method
 
 
 ## R3 Dll 注入方式总结
@@ -182,6 +182,6 @@ PROCESS\_ALL\_ACCESS包括以下 **等** 特定权限：
 目前为止，驱动可以防御住所有的用户层 针对特定进程的 dll 注入行为
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTEzOTkzODc4NTAsLTkyNTAyMjI4LC02Mz
+eyJoaXN0b3J5IjpbLTE2OTE2NDI3ODYsLTkyNTAyMjI4LC02Mz
 gxNjgyNzYsLTgyODcxMDQ2XX0=
 -->
