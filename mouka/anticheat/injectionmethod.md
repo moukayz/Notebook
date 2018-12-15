@@ -1,5 +1,6 @@
 # InjectionMethod
 
+
 ## R3 Dll 注入方式总结
 
 ### 1. SetWindowsHookEx 方法
@@ -13,7 +14,7 @@ HHOOK WINAPI SetWindowsHookEx(
 );
 ```
 
-> 该方法主要通过注册 指定线程（dwThreadId） 的 Windows 消息事件（idHook）的回调函数（lpfn）来进行注入 当 dwThreadId 设为 0 或者不是由当前进程创建的线程时，该 hook 函数（lpfn）必须存在于 指定的 dll （hMod）中 eg. `SetWindowsHookEx(WH_CBT, MyHookProc, MyDll, 0)` ，当系统中有线程触发 WH\_CBT事件后，系统自动将 MyDll载入该线程中，并执行 MyHookProc，以此实现 Dll 注入
+该方法主要通过注册 指定线程（dwThreadId） 的 Windows 消息事件（idHook）的回调函数（lpfn）来进行注入 当 dwThreadId 设为 0 或者不是由当前进程创建的线程时，该 hook 函数（lpfn）必须存在于 指定的 dll （hMod）中 eg. `SetWindowsHookEx(WH_CBT, MyHookProc, MyDll, 0)` ，当系统中有线程触发 WH\_CBT事件后，系统自动将 MyDll载入该线程中，并执行 MyHookProc，以此实现 Dll 注入
 
 ### 2. CreateRemoteThread 方法
 
@@ -29,9 +30,9 @@ HANDLE CreateRemoteThread(
 );
 ```
 
-> 该方法在CreateRemoteThread 在目标进程中创建一个线程，再通过 新创建的线程进行dll注入 1. `loadLibraryAddr = GetProcAddress(GetModuleHandle("kernel32.dll"), "LoadLibraryA") // 获取函数 LoadLibrary 在内存中的地址`
->
-> 1. `remoteDllAddr = VirtualAllcoEx (targetProcess, NULL, str(myDllPath)+1, MEM_COMMIT | MEM_READWRITE) // 在目标进程空间给将要注入的dll路径字符串（形如“c:\my.dll”）分配空间`
+该方法在CreateRemoteThread 在目标进程中创建一个线程，再通过 新创建的线程进行dll注入 1. `loadLibraryAddr = GetProcAddress(GetModuleHandle("kernel32.dll"), "LoadLibraryA") // 获取函数 LoadLibrary 在内存中的地址`
+
+1. `remoteDllAddr = VirtualAllcoEx (targetProcess, NULL, str(myDllPath)+1, MEM_COMMIT | MEM_READWRITE) // 在目标进程空间给将要注入的dll路径字符串（形如“c:\my.dll”）分配空间`
 > 2. `WriteProcesMemory(targetProcess, remoteDllAddr, (LPVOID)myDllPath, strlen(myDllPath)+1, NULL) // 将dll路径 写入目标进程空间`
 > 3. ```c
 >    CreateRemoteThread(
@@ -166,3 +167,6 @@ PROCESS\_ALL\_ACCESS包括以下 **等** 特定权限：
 
 目前为止，驱动可以防御住所有的用户层 针对特定进程的 dll 注入行为
 
+<!--stackedit_data:
+eyJoaXN0b3J5IjpbNjE0MDMxOTUyXX0=
+-->
