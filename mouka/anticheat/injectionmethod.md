@@ -56,7 +56,7 @@ HANDLE CreateRemoteThread(
 	      NULL,NULL    )    
 	   ```
 
-   **通过该方法创建的线程，其创建进程和父进程均为 目标进程 ！**
+**通过该方法创建的线程，其创建进程和父进程均为 目标进程 ！**
 
 **另：还可以通过RtlCreateUserThread 和 NtCreateThread 函数进行注入，但这两个函数没有从ntdll.dll导出，因此需要手动寻找这两个函数的地址。注入原理和 CreateRemoteThread非常相似，只是替换了CreateRemoteThread 来在目标进程中创建线程，因此将它们归为一类**
 
@@ -173,5 +173,5 @@ PROCESS\_ALL\_ACCESS包括以下 **等** 特定权限：
 目前为止，驱动可以防御住所有的用户层 针对特定进程的 dll 注入行为
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTY5Njg1Mzk5MF19
+eyJoaXN0b3J5IjpbLTgyODcxMDQ2XX0=
 -->
