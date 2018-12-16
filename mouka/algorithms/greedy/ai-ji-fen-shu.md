@@ -39,6 +39,8 @@ Solution is below !
 
 ### 实现
 
+{% tabs %}
+{% tab title="Python" %}
 ```python
 def EgyptianFraction(numerator, denominator):
 	result = []
@@ -57,6 +59,34 @@ def EgyptianFraction(numerator, denominator):
 
 	return result
 ```
+{% endtab %}
+
+{% tab title="C++" %}
+```cpp
+vector<int> EgyptianFraction( unsigned int numerator, unsigned int denominator ) 
+{
+     vector<int> ret;
+     vector<int> remain;
+     int unit;
+
+     if ( denominator % numerator == 0)   // eg. 2/6
+     {
+          ret.push_back( denominator / numerator );
+          return ret;
+     }
+     else if ( numerator < denominator )
+     {
+          unit = denominator / numerator + 1;
+          ret.push_back( unit );
+          remain = EgyptianFraction( numerator*unit - denominator, denominator*unit );
+     }
+
+     ret.insert( end( ret ), begin( remain ), end( remain ) );
+     return ret;
+}
+```
+{% endtab %}
+{% endtabs %}
 
 
 

@@ -42,6 +42,8 @@ Solution is below
 
 ### 实现
 
+{% tabs %}
+{% tab title="Python" %}
 ```python
 def MinSwapBracketBalancing(Brackets: list):
 	# 首先遍历字符串，获取所有左括号的位置
@@ -76,5 +78,45 @@ def MinSwapBracketBalancing(Brackets: list):
 		i += 1
 
 	return sum
+```
+{% endtab %}
+
+{% tab title="C++" %}
+```cpp
+int MinSwapsBracketBalancing(string Brackets) {
+	vector<int> leftBrackets;
+
+	// Get positions of all left brackets
+	for (auto i = 0;i<Brackets.size(); i++) {
+		if (Brackets[i] == '[')
+			leftBrackets.push_back(i);
+	}
+
+	auto count = 0;	// Current unbalanced left brackets
+	auto pos = 0;	// Next position of next left brackets
+	auto sum = 0;	// Total moves to balance brackets
+
+	for (auto i = 0; i < Brackets.size(); i++) {
+		if (Brackets[i] == '[') {
+			count++;
+			pos++;
+		}
+		else if (--count < 0) {
+			// Get unbalanced right bracket
+			// Swap it with next left bracket
+			swap(Brackets[i], Brackets[leftBrackets[pos]]);
+			sum += leftBrackets[pos] - i;
+		}
+	}
+
+	return sum;
+
+}
+```
+{% endtab %}
+{% endtabs %}
+
+```python
+
 ```
 

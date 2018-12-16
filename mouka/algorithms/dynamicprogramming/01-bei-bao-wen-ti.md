@@ -48,6 +48,8 @@ Solution is below!
 
 ### 实现
 
+{% tabs %}
+{% tab title="Python" %}
 ```python
 def OneZero_Knapsack_DP(Weight:list, Value:list, MaxWeight):
 	size = len(Weight)
@@ -68,5 +70,82 @@ def OneZero_Knapsack_DP(Weight:list, Value:list, MaxWeight):
 				totalValue[i][j] = totalValue[i - 1][j]
 
 	return totalValue[size][MaxWeight]
+	
+# 优化方法，
+# 由于在计算可放入物品数量为k时的最大价值 totalValue[k][j] 时，
+# 只需知道可放入物品数为 k-1 时的最大价值 totalValue[k-1][j] 和 totalValue[k-1][j-w[k]]，
+# 因此我们只需要保留最大价值与背包容量的关系，即只需构建数组 totalValue[MaxWeight+1]，
+# 用totalValue[w]的新值与旧值来表示放入 i 个物品的最大价值和 放入 i-1 个物品时的最大价值
+# 然后用同样的方法进行迭代
+def OneZero_Knapsack_DP2(Weight:list, Value:list, MaxWeight):
+	size = len(Weight)
+	totalValue = [0 for i in range(MaxWeight + 1)] # 初始化数组 totalValue[MaxWeight+1]
+
+	for i in range(size):
+		for j in range(MaxWeight , Weight[i]-1, -1):	# MaxWeight <= j <= Weight[i]
+			totalValue[j] = max(totalValue[j], Value[i] + totalValue[j - Weight[i]])
+		# 当背包当前容量小于第i个物品的重量时，i不放入背包，
+		# 因此 totalValue[j < weight[i]] 的值不用改变
+
+	return totalValue[MaxWeight]
 ```
+{% endtab %}
+
+{% tab title="C++" %}
+```cpp
+// Naive method
+int MaxValue( vector<int>value, vector<int>weight, int MaxWeight, int size ) {
+     if ( size == 0 ) return 0;
+
+     if ( weight[size - 1] > MaxWeight ) {
+          return MaxValue( value, weight, MaxWeight, size - 1 );
+     }
+
+     return max(
+          value[size - 1] + MaxValue( value, weight, MaxWeight - weight[size - 1], size - 1 ),
+          MaxValue( value, weight, MaxWeight, size - 1 )
+     );
+
+}
+
+int OneZero_Knapsack_Naive( vector<int>value, vector<int>weight, int MaxWeight ) {
+     return MaxValue( value, weight, MaxWeight, value.size() );
+}
+
+/*
+
+Dynamic Programming approach for 0-1 knapscak
+
+Not work when value or weight include float items !!
+
+*/
+
+#define index(a,b)  ((MaxWeight+1)*(a) + (b))
+
+int OneZero_Knapsack_DP( vector<int>value, vector<int>weight, int MaxWeight ) {
+     int size = value.size();
+     vector<int> totalValue;
+     totalValue.resize( ( MaxWeight + 1 )*( size + 1 ) );       // Use 1-D array to represent matrix tatalValue[size+1][MaxWeight+1]
+
+     for ( int i = 0; i <= size; i++ ) {
+          for ( int j = 0; j <= MaxWeight; j++ ) {
+               if ( i == 0 || j == 0 )
+                    totalValue[index( i, j )] = 0;
+               else if ( j >= weight[i - 1] ) {
+                    totalValue[index( i, j )] = max(
+                         totalValue[index( i - 1, j )],         // Not include the ith item for max weight j
+                         value[i - 1] + totalValue[index( i - 1, j - weight[i - 1] )] );     // Include the ith item
+               }
+               else
+                    // Exceed the max weight, so cannot include the ith item
+                    totalValue[index( i, j )] = totalValue[index( i - 1, j )];
+          }
+     }
+
+     return totalValue[index( size, MaxWeight )];
+
+}
+```
+{% endtab %}
+{% endtabs %}
 
