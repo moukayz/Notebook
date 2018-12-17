@@ -32,6 +32,8 @@
     * [埃及分数](mouka/algorithms/greedy/ai-ji-fen-shu.md)
   * [DynamicProgramming](mouka/algorithms/dynamicprogramming/README.md)
     * [0-1 背包问题](mouka/algorithms/dynamicprogramming/01-bei-bao-wen-ti.md)
+  * [LeetCode](mouka/algorithms/leetcode/README.md)
+    * [Count Primes](mouka/algorithms/leetcode/count-primes.md)
 
 ## Honey
 
