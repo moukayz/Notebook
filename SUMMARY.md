@@ -5,6 +5,7 @@
 ## Mouka
 
 * [Windows Internal](mouka/windowsinternal/README.md)
+  * [Patch Guard Oops](mouka/windowsinternal/patch-guard-oops.md)
   * [Misc](mouka/windowsinternal/misc/README.md)
     * [Volatile in C](mouka/windowsinternal/misc/volatile-in-c.md)
   * [SSDT\(Shadow\) Hook](mouka/windowsinternal/ssdt-hook.md)
