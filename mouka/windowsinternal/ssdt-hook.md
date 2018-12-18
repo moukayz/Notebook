@@ -220,7 +220,13 @@ fffff800`03e95779 4c8d1d00212300  lea     r11,[nt!KeServiceDescriptorTableShadow
 So search the whole kernel address from the kernel base for **KiSystemServiceStart** 's pattern
 
 ```c
-const unsigned char KiSystemServiceStartPattern[] = { 0x8B, 0xF8, 0xC1, 0xEF, 0x07, 0x83, 0xE7, 0x20, 0x25, 0xFF, 0x0F, 0x00, 0x00 };
+const unsigned char KiSystemServiceStartPattern[] = { 
+    0x8B, 0xF8,                     // mov edi,eax
+    0xC1, 0xEF, 0x07,               // shr edi,7
+    0x83, 0xE7, 0x20,               // and edi,20h
+    0x25, 0xFF, 0x0F, 0x00, 0x00    // and eax,0fffh  
+};
+
 bool found = false;
 ULONG KiSSSOffset;
 for(KiSSSOffset = 0; KiSSSOffset < kernelSize - signatureSize; KiSSSOffset++)
@@ -264,7 +270,7 @@ Then we can get the addresses of **nt!KiServiceTable\(SSDT\)** and **win32k!W32p
 
 ```c
 PVOID ntTable = (PVOID)shadow;
-PVOID win32kTable = (PVOID)((ULONG_PTR)shadow + 0x20);
+PVOID win32kTable = (PVOID)((ULONG_PTR)shadow + 0x20);    // Offset showed in Windbg
 ```
 
 ## Find the base address of ntoskrnl.exe and win32k.sys
@@ -379,7 +385,7 @@ fffff800`0419e40c 498943f0        mov     qword ptr [r11-10h],rax
 fffff800`0419e410 c744247020000000 mov     dword ptr [rsp+70h],20h
 ```
 
-**SO**, we can get any SSDT function's index from its name by looking into its user-mode stub function exported by NTDLL.DLL
+**SO, we can get any SSDT function's index from its name by looking into its user-mode stub function exported by NTDLL.DLL!**
 
 #### Get SSDT index from ntdll.dll
 
@@ -529,9 +535,9 @@ realNtFunction = (PVOID)(ntTable[SsdtOffset]);
 
 ## Hook SSDT
 
-**!!! Yon have to first disable PatchGuard or enable DebugMode on your system !!!**
+**!!! Yon have to first disable PatchGuard or enable DebugMode on your system !!!** 😀 
 
-Because SSDT are read-only kernel memory, so you have to disable **write protection** before modifying it , we use **MDL** to do it. Below is the helper function to copy data to any read-only kernel memory
+Because SSDT are read-only kernel memory, so you have to disable **write protection** before modifying it , we use **MDL** to do this. Below is the helper function to copy data to any read-only kernel memory
 
 ```c
 NTSTATUS RtlSuperCopyMemory(
@@ -633,7 +639,7 @@ if(pnth->Signature != IMAGE_NT_SIGNATURE)
 IMAGE_SECTION_HEADER* psh = IMAGE_FIRST_SECTION(pnth);
 ```
 
-findout in which section the real function is
+find out in which section the real function is
 
 ```c
 static ULONG RvaToSection(IMAGE_NT_HEADERS* pNtHdr, ULONG dwRVA)
@@ -659,7 +665,7 @@ CodeSize = psh[section].SizeOfRawData;
 CodeStart = (PVOID)((ULONG_PTR)ntBase + psh[section].VirtualAddress);
 ```
 
-then try to find a at least 12bytes large nop block in the code page
+then try to find a at least 12 bytes large nop block in the code page
 
 ```c
 unsigned char* Code = (unsigned char*)CodeStart;

@@ -4,7 +4,9 @@
 
 ## Mouka
 
-* [WindowsInternal](mouka/windowsinternal/README.md)
+* [Windows Internal](mouka/windowsinternal/README.md)
+  * [Misc](mouka/windowsinternal/misc/README.md)
+    * [Volatile in C](mouka/windowsinternal/misc/volatile-in-c.md)
   * [SSDT\(Shadow\) Hook](mouka/windowsinternal/ssdt-hook.md)
 * [AntiCheat](mouka/anticheat/README.md)
   * [Inject Defense](mouka/anticheat/injectiondefense.md)
