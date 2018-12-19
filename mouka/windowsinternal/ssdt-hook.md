@@ -535,36 +535,9 @@ realNtFunction = (PVOID)(ntTable[SsdtOffset]);
 
 ## Hook SSDT
 
+{% hint style="info" %}
 **!!! Yon have to first disable PatchGuard or enable DebugMode on your system !!!** 😀 
-
-Because SSDT are read-only kernel memory, so you have to disable **write protection** before modifying it , we use **MDL** to do this. Below is the helper function to copy data to any read-only kernel memory
-
-```c
-NTSTATUS RtlSuperCopyMemory(
-    IN VOID UNALIGNED* Destination, 
-    IN CONST VOID UNALIGNED* Source, 
-    IN ULONG Length)
-{
-    //Change memory properties.
-    PMDL g_pmdl = IoAllocateMdl(Destination, Length, 0, 0, NULL);
-    if(!g_pmdl)
-        return STATUS_UNSUCCESSFUL;
-    MmBuildMdlForNonPagedPool(g_pmdl);
-    unsigned int* Mapped = (unsigned int*)MmMapLockedPages(g_pmdl, KernelMode);
-    if(!Mapped)
-    {
-        IoFreeMdl(g_pmdl);
-        return STATUS_UNSUCCESSFUL;
-    }
-    KIRQL kirql = KeRaiseIrqlToDpcLevel();
-    RtlCopyMemory(Mapped, Source, Length);
-    KeLowerIrql(kirql);
-    //Restore memory properties.
-    MmUnmapLockedPages((PVOID)Mapped, g_pmdl);
-    IoFreeMdl(g_pmdl);
-    return STATUS_SUCCESS;
-}
-```
+{% endhint %}
 
 In order to unhook SSDT in future, define some hook structs as below \(**HOOKOPCODES** is our shellcode for x64 hook\)
 
@@ -596,7 +569,71 @@ typedef struct HOOKSTRUCT
 }HOOK, *PHOOK;
 ```
 
-### x86
+### Disable Write Protection
+
+Because SSDT are read-only kernel memory, so you have to disable **write protection** before modifying it , we use **MDL** to do this. Below is the helper function to copy data to any read-only kernel memory
+
+```c
+NTSTATUS SuperCopyMemory(
+    IN VOID UNALIGNED* Destination, 
+    IN CONST VOID UNALIGNED* Source, 
+    IN ULONG Length)
+{
+    //Change memory properties.
+    PMDL g_pmdl = IoAllocateMdl(Destination, Length, 0, 0, NULL);
+    if(!g_pmdl)
+        return STATUS_UNSUCCESSFUL;
+    MmBuildMdlForNonPagedPool(g_pmdl);
+    unsigned int* Mapped = (unsigned int*)MmMapLockedPages(g_pmdl, KernelMode);
+    if(!Mapped)
+    {
+        IoFreeMdl(g_pmdl);
+        return STATUS_UNSUCCESSFUL;
+    }
+    KIRQL kirql = KeRaiseIrqlToDpcLevel();
+    RtlCopyMemory(Mapped, Source, Length);
+    KeLowerIrql(kirql);
+    //Restore memory properties.
+    MmUnmapLockedPages((PVOID)Mapped, g_pmdl);
+    IoFreeMdl(g_pmdl);
+    return STATUS_SUCCESS;
+}
+```
+
+Also, we can modify the "**WP"** flags of the `cr0`register to **enable** or **disable** kernel memory write protection
+
+**To disable WP:**
+
+```c
+KIRQL DisableWP(){
+    KIRQL irql=KeRaiseIrqlToDpcLevel();
+    ULONG_PTR cr0=__readcr0();
+#ifdef _AMD64_        
+    cr0 &= 0xfffffffffffeffff;
+#else
+    cr0 &= 0xfffeffff;
+#endif
+    __writecr0(cr0);
+    _disable();    // Disable interrupts
+    return irql;
+}
+```
+
+there we can modify the kernel memory without access violation. 🧐
+
+**To enable WP after writing:**
+
+```c
+void EnableWP(KIRQL irql){
+	ULONG_PTR cr0=__readcr0();
+	cr0 |= 0x10000;
+	_enable();		// Enable interrupts
+	__writecr0(cr0);
+	KeLowerIrql(irql);
+}
+```
+
+### x86 Hook
 
 Just replace the SSDT index with your own function
 
@@ -612,7 +649,7 @@ hHook.SSDTaddress = realNtFunction;
 SuperCopyMemory(&realNtFunction, YourFunction);
 ```
 
-### x64
+### x64 Hook
 
 In x64 platform, because `realFunction = ntTable[FunctionIndex] >> 4 + ntTable`, the only thing you can modify is the value of `ntTable[FunctionIndex]`, and it's **long** type\(32 bit\), which means you can only jump within the range **-2GB + ntTable ~ 2GB + ntTable**, Obviously the address is inside the **ntoskrnl.exe module address space**. So to jump to the function located in our own module, we have to make a **"indirect jump"**.
 
@@ -731,4 +768,20 @@ SuperCopyMemory(&ntTable[FunctionIndex], newOffset);
 ```
 
 **DONE!**
+
+## Hook Shadow SSDT
+
+The steps of hooking Shadow is similar with SSDT hook, except that you have to attach to a user-mode GUI process before getting the base address of the Shadow. 
+
+```c
+// Get the process id of the "winlogon.exe" process
+GetProcessIdByName(ProcessId, "winlogon.exe");
+PsLookupProcessByProcessId( ProcessId, &Process );
+APC_STATE oldApc;
+KeStackAttachProcess(Process, &oldApc);
+
+// Find Shadows SSDT and do dirty things
+
+KeUnstackDetachProcess(&oldApc);
+```
 
