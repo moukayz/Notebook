@@ -6,7 +6,8 @@
 
 * [Windows Internal](mouka/windowsinternal/README.md)
   * [Patch Guard Oops](mouka/windowsinternal/patch-guard-oops.md)
-  * [SSDT\(Shadow\) Hook](mouka/windowsinternal/ssdt-hook.md)
+  * [Hook SSDT\(Shadow\)](mouka/windowsinternal/ssdt-hook.md)
+  * [Restore SSDT\(Shadow\)](mouka/windowsinternal/restore-ssdt-shadow.md)
   * [Misc](mouka/windowsinternal/misc/README.md)
     * [Volatile in C](mouka/windowsinternal/misc/volatile-in-c.md)
 * [AntiCheat](mouka/anticheat/README.md)

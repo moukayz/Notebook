@@ -1,4 +1,4 @@
-# SSDT\(Shadow\) Hook
+# Hook SSDT\(Shadow\)
 
 \[TOC\]
 
