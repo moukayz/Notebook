@@ -107,7 +107,8 @@ Now we can calculate the original SSDT value of any SSDT function with its index
 // Get default function address with index
 defaultAddress = (PULONGULONG)ssdtFileBase + SSDTIndex;  
 originalOffset = defaultAddress - (ntDefaultBase + tableRva); 
-originalValue =  originalOffset << 4;
+originalValue =  (LONG)(originalOffset << 4);
+// Remember original value is LONG type
 ```
 
 #### Combine together
@@ -117,7 +118,12 @@ So the steps to get the original value of any SSDT function is:
 1. Get kernel base address `ntBase` and SSDT base address `ssdtBase` \( like in  [Hook SSDT\(Shadow\)](ssdt-hook.md#find-the-base-address-of-ntoskrnl-exe-and-win-32-k-sys)\), 
 2. Calculate the RVA between them: `tableRva`
 3. Read ntoskrnl.exe in memory and get its default image base address `ntDefaultBase` and original SSDT buffer `ssdtFileBase`
-4. For any function we can calculate its default SSDT value with its SSDT index ,which is `((PULONG_PTR)ssdtFileBase + Index-ntDefaultBase-tableRva) << 4`
+4. For any function we can calculate its default SSDT value with its SSDT index ,which is 
+
+```c
+LONG originalValue = 
+((PULONG_PTR)ssdtFileBase + Index - ntDefaultBase - tableRva) << 4
+```
 
 ### x86
 
@@ -212,12 +218,22 @@ Unhooking Shadow SSDT is very similar to unhooking SSDT. The steps are almost th
 1. Find win32k base address `w32kBase` and Shadow SSDT base address `w32kTable` \( look [Find SSDT\(Shadow\) base address](ssdt-hook.md#find-ssdt-shadow-base-address) and Find [win32k.sys base address](ssdt-hook.md#find-the-base-address-of-ntoskrnl-exe-and-win-32-k-sys)\)
 2. Calculate the RVA between them: `w32kTableRva`
 3. Read win32k.sys into memory and get its default image base `w32kDefaultBase` and original Shadow SSDT `w32kTableFileBase`
-4. For any function in Shadow SSDT, we can calculate its original value by its index, which is `((PULONG_PTR)w32kTableFileBase + Index - w32kDefaultBase - w32kTableRva) << 4`
+4. For any function in Shadow SSDT, we can calculate its original value by its index, which is 
+
+```c
+LONG originalValue =
+((PULONG_PTR)w32kTableFileBase + Index - w32kDefaultBase - w32kTableRva) << 4
+```
 
 ### x86
 
 1. ...
 2. ...
 3. ...
-4. The original value in Shadow SSDT is `(PULONG_PTR)w32kTableFileBase + Index - w32kDefaultBase - w32kTableRva`
+4. The original value in Shadow SSDT is 
+
+```c
+LONG originalValue =
+(PULONG_PTR)w32kTableFileBase + Index - w32kDefaultBase - w32kTableRva
+```
 

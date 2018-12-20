@@ -158,7 +158,7 @@ Implicit process is now fffffa80`042a8b30
 **Function Index to real function address:**
 
 ```c
-readAddress = (ntTable[FunctionIndex >> 4]) + SSDT(Shadow)BaseAddress;
+readAddress = (ULONG_PTR)(ntTable[FunctionIndex] >> 4) + SSDT(Shadow)BaseAddress;
 ```
 
 **Find table address in a driver**
