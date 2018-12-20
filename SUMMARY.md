@@ -5,6 +5,8 @@
 ## Mouka
 
 * [Windows Internal](mouka/windowsinternal/README.md)
+  * [Helper Functions\(todo:\)](mouka/windowsinternal/helper-functions-todo.md)
+  * [Find Kernel Module Address\(todo:\)](mouka/windowsinternal/find-kernel-module-address-todo.md)
   * [Patch Guard Oops](mouka/windowsinternal/patch-guard-oops.md)
   * [Hook SSDT\(Shadow\)](mouka/windowsinternal/ssdt-hook.md)
   * [Restore SSDT\(Shadow\)](mouka/windowsinternal/restore-ssdt-shadow.md)

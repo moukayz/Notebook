@@ -30,26 +30,6 @@ struct SSDTStruct
 83f86b04  00000000
 83f86b08  00000191
 83f86b0c  83e7d304 nt!KiArgumentTable
-83f86b10  00000000
-83f86b14  00000000
-83f86b18  00000000
-83f86b1c  00000000
-83f86b20  77ae55dd ntdll!ExpInterlockedPopEntrySListFault
-83f86b24  77ae55b4 ntdll!ExpInterlockedPopEntrySListResume
-83f86b28  00000000
-83f86b2c  011db9c8
-83f86b30  841e85b0 nt!_NULL_IMPORT_DESCRIPTOR+0x18a2
-83f86b34  841514f4 nt!KdpTrap
-83f86b38  83ef1f63 nt!KdpSwitchProcessor
-83f86b3c  00000000
-83f86b40  83e7ccbc nt!KiServiceTable    # KeServiceDescriptorTableShadow is here !!!
-83f86b44  00000000
-83f86b48  00000191
-83f86b4c  83e7d304 nt!KiArgumentTable
-83f86b50  9be58000 win32k!W32pServiceTable
-83f86b54  00000000
-83f86b58  00000339
-83f86b5c  9be5902c win32k!W32pArgumentTable
 
 1: kd> dd /c 1 nt!KiServiceTable l2
 83e7ccbc  84098ffa    # Function offset
@@ -74,7 +54,7 @@ struct SSDTStruct
 9be58004  9bdfa31b
 ```
 
-**Before dump SSDT Shadow, you have to attach to any user-mode process \(like winlogon.exe\)**
+**Before dump SSDT Shadow, you have to attach to any user-mode GUI process \(like winlogon.exe\)**
 
 ```text
 1: kd> !process 0 0 winlogon.exe
@@ -93,7 +73,7 @@ Implicit process is now 882d3d20
 realAddress = (PVOID)ntTable[FunctionIndex]
 ```
 
-**Program**
+**Find table address in a driver**
 
 Because **nt!KeServiceDescriptorTable** is exported by kernel, we can get its address in the program
 
@@ -135,15 +115,7 @@ fffff800`03e9730c  02e87805
 fffff800`03e97310  031a4a06
 fffff800`03e97314  03116a05
 fffff800`03e97318  02bb9901
-fffff800`03e9731c  02b4f200
-fffff800`03e97320  0312cc40
-fffff800`03e97324  03dd7400
-fffff800`03e97328  02c84700
-fffff800`03e9732c  02e7d100
-fffff800`03e97330  02f68100
-fffff800`03e97334  02e02301
-fffff800`03e97338  02dd0601
-fffff800`03e9733c  02d96100
+...
 ```
 
 **SSDT Shadow:**
@@ -164,21 +136,10 @@ fffff960`00111f00  fff3a740        # GDI Function offset
 fffff960`00111f04  fff0b501
 fffff960`00111f08  000206c0
 fffff960`00111f0c  001021c0
-fffff960`00111f10  00096000
-fffff960`00111f14  00022640
-fffff960`00111f18  fff9a900
-fffff960`00111f1c  ffde0b03
-fffff960`00111f20  ffb7a7c7
-fffff960`00111f24  00fc5200
-fffff960`00111f28  ffed2e80
-fffff960`00111f2c  ffe50e00
-fffff960`00111f30  000c58c0
-fffff960`00111f34  000af600
-fffff960`00111f38  000e8bc0
-fffff960`00111f3c  fffeb300
+...
 ```
 
-**Before dump SSDT Shadow, you have to attach to any user-mode process \(like winlogon.exe\)**
+**Before dump SSDT Shadow, you have to attach to any user-mode GUI process \(like winlogon.exe\)**
 
 ```text
 1: kd> !process 0 0 winlogon.exe
@@ -200,7 +161,7 @@ Implicit process is now fffffa80`042a8b30
 readAddress = (ntTable[FunctionIndex >> 4]) + SSDT(Shadow)BaseAddress;
 ```
 
-**Program**
+**Find table address in a driver**
 
 Find **nt!KeServiceDescriptorTable** and **nt!KeServiceDescriptorTableShadow** in kernel function **nt!KiSystemServiceStart**
 
@@ -217,7 +178,7 @@ fffff800`03e95772 4c8d15c7202300  lea     r10,[nt!KeServiceDescriptorTable (ffff
 fffff800`03e95779 4c8d1d00212300  lea     r11,[nt!KeServiceDescriptorTableShadow
 ```
 
-So search the whole kernel address from the kernel base for **KiSystemServiceStart** 's pattern
+As shown above, we can search the whole kernel address from the kernel base for **KiSystemServiceStart** 's pattern
 
 ```c
 const unsigned char KiSystemServiceStartPattern[] = { 
