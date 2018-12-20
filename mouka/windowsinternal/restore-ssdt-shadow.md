@@ -29,31 +29,34 @@ We have
 ntBase = 0xfffff80003e19000;
 ntTableBase = 0xfffff80003e9a300;
 // So the offset is  
-tableRva = ntTableBase - ntTableBase; // --> 0x81300
-// table offset in ntoskrnl.exe file
-tableOffset = RvaToOffset(tableRva);  // --> 0x80300
+tableRva = ntTableBase - ntBase; // --> 0x81300
+// table offset to file base in ntoskrnl.exe file
+tableOffset = RvaToOffset(tableRva);  // --> 0x80900
 ```
 
-Then  **read** the kernel executable \( c:\windows\system32\ntoskrnl.exe\) to memory \(just like we read ntdll.dll in [SSDT HOOK](ssdt-hook.md#get-ssdt-index-from-ntdll-dll)\) to get original SSDT base 
+Then  **read** the kernel executable to memory \(just like we read ntdll.dll in [SSDT HOOK](ssdt-hook.md#get-ssdt-index-from-ntdll-dll)\) to get original SSDT base in file \( the default path is "c:\windows\system32\ntoskrnl.exe", but to double-check, we get its image path from kernel module information \)
 
 ```c
-PVOID pNtFileBase = ReadFile(ntfilename); 
-ULONG_PTR ssdtFileBase = pNtUserBase + tableRva;
+// Get pSystemInfoBuffer by ZwQuerySystemInformation routine
+PUCHAR ntFilename = pSystemInfoBuffer->Module[0].FullPathName;
+PVOID pNtFileBase = ReadFile(ntFilename); 
+ULONG_PTR ssdtFileBase = pNtFileBase + tableOffset;
 ```
 
 and analyze its PE header to get its **ImageBase** field.
 
 ```c
-PIMAGE_DOS_HEADER pDosHeader = DOS_HEADER( pNtUserBase );
-PIMAGE_NT_HEADERS pNtHeaders = NT_HEADERS( pNtUserBase );
+PIMAGE_DOS_HEADER pDosHeader = DOS_HEADER( pNtFileBase );
+PIMAGE_NT_HEADERS pNtHeaders = NT_HEADERS( pNtFileBase );
 
 ULONG_PTR ntDefaultBase = pNtHeaders->OptionalHeader.ImageBase;
 // --> 0x140000000
 ```
 
-Then read the first bytes of the SSDT in ntoskrnl.exe file buffer. \( Instead I read them in a binary file editor which is the same as in a program\)
+Then read the first bytes of the SSDT in ntoskrnl.exe file buffer. \( For simplicity, I read them in a binary file editor which is the same as in a program\)
 
 ```c
+// bytes begin at address of ssdtFileBase
 A0 EC 48 40 01 00 00 00 C0 68 37 40 01 00 00 00
 A0 81 07 40 01 00 00 00 80 9A 36 40 01 00 00 00
 A0 B7 39 40 01 00 00 00 A0 29 39 40 01 00 00 00
@@ -86,15 +89,17 @@ ULONGLONG originalBytes = 0x000000014048ECA0
 
  **Here comes the climax of the play.**
 
-```cpp
-0x0040d9a0 = 0x000000014048ECA0 - 0x0000000140000000 - 0x81300;
-// which is
-originalOffset = originalBytes  - (ntDefaultBase + tableRva);
-// which is
-originalOffset = originalBytes - ssdtDefaultBase
-```
+$$
+0040d9a0 = 000000014048ECA0 - 0000000140000000 - 81300
+$$
 
-So we can conclude that the **originalBytes** in ntos file is actually the default address of its corresponding kernel function .
+**which is** 
+
+$$
+originalOffset = originalBytes  - (ntDefaultBase + tableRva)
+$$
+
+So we can conclude that the **originalBytes** in nt file is actually the default address of its corresponding kernel function .
 
 Now we can calculate the original SSDT value of any SSDT function with its index even if SSDT has been modified in runtime.
 
@@ -113,4 +118,92 @@ So the steps to get the original value of any SSDT function is:
 2. Then calculate the RVA between them
 3. Read ntoskrnl.exe in memory and get its default image base address and original SSDT buffer
 4. Finally for any function we can calculate its default SSDT value with its SSDT index.
+
+### x86
+
+In X86 platform the thing is very similar.
+
+First we need to get the kernel base and SSDT base , as shown in Windbg:
+
+```cpp
+0: kd> lmDmnt
+Browse full module list
+start    end        module name
+83e4b000 8425d000   nt         (pdb symbols)          C:\Program Files (x86)\Windows Kits\10\Debuggers\x86\sym\ntkrpamp.pdb\C820DD65C4BC4499A56D7610BE16FD082\ntkrpamp.pdb
+0: kd> dps nt!KeServiceDescriptorTable
+83fb4b00  83ec9d9c nt!KiServiceTable
+83fb4b04  00000000
+83fb4b08  00000191
+83fb4b0c  83eca3e4 nt!KiArgumentTable
+```
+
+we have
+
+```c
+ntBase = 0x83e4b000 ;
+ntTableBase = 0x83ec9d9c ;
+// So the offset is  
+tableRva = ntTableBase - ntBase; // --> 0x7ed9c
+// table offset to file base in ntoskrnl.exe file
+tableOffset = RvaToOffset(tableRva);  // --> 0x7e59c
+```
+
+Then read the nt file into memory\( **note that we need to get the right file path from `SystemModuleInformation` by `ZwQuerySystemInformation`\)**
+
+```c
+// Get pSystemInfoBuffer by ZwQuerySystemInformation routine
+PUCHAR ntFilename = pSystemInfoBuffer->Module[0].FullPathName;
+PVOID pNtFileBase = ReadFile(ntFilename); 
+ULONG_PTR ssdtFileBase = pNtFileBase + tableOffset;
+```
+
+and analyze its PE header to get its **ImageBase** field.
+
+```c
+PIMAGE_DOS_HEADER pDosHeader = DOS_HEADER( pNtFileBase );
+PIMAGE_NT_HEADERS pNtHeaders = NT_HEADERS( pNtFileBase );
+
+ULONG_PTR ntDefaultBase = pNtHeaders->OptionalHeader.ImageBase;
+// --> 0x400000
+```
+
+The first few bytes at `ssdtFileBase` are : \( Opened in binary editor\)
+
+```c
+30 9C 67 00 0D 14 4C 00 6E 9B 60 00 8A 58 42 00
+07 B5 67 00 96 E3 4F 00 A1 BB 6E 00 EA BB 6E 00
+```
+
+and the first few bytes at real SSDT in kernel memory are：
+
+```c
+0: kd> dd /c1 nt!KiServiceTable l5
+83ec9d9c  840c4c30
+83ec9da0  83f0c40d
+83ec9da4  84054b6e
+83ec9da8  83e7088a
+83ec9dac  840c6507
+```
+
+So we have
+
+$$
+840c4c30 = 00679c30 - 00400000 + 83e4b000
+$$
+
+which is
+
+$$
+originalValue = defaultAddress - ntDefaultBase + ntBase
+$$
+
+Then we can calculate the original SSDT value of any SSDT function with its index.
+
+```c
+// Get default function address with index
+defaultAddress = (PULONG)ssdtFileBase + SSDTIndex;  
+originalValue = defaultAddress - (ntDefaultBase + tableRva); 
+```
+
+
 
