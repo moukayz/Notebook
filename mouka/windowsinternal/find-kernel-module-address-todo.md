@@ -94,6 +94,67 @@ for (ULONG i = 0; i < pMods->NumberOfModules; i++)
 }
 ```
 
+## Method 1.5: Query system information\(Aux\_Klib\)
+
+Just like method 1 MS has provided another query function named `AuxKlibQueryModuleInformation` which belongs to the lib `Aux_Klib`\( **Note** you have to add it to link manually\) to query **ONLY** system module information. This function is declared as below \( [see msdn pages for details](https://docs.microsoft.com/en-us/windows-hardware/drivers/ddi/content/aux_klib/nf-aux_klib-auxklibquerymoduleinformation) \):
+
+```c
+NTSTATUS AuxKlibQueryModuleInformation(
+  PULONG BufferSize,
+  ULONG  ElementSize,
+  PVOID  QueryInfo
+);
+```
+
+To use this function, we must call function `AuxKlibInitialize` first \(which is needed in any function call in **Aux\_Klib** \)
+
+```c
+AuxKlibInitialize();
+```
+
+Then just like `ZwQuerySystemInformation`, we need to get specific size of the information buffer.
+
+```c
+status = AuxKlibQueryModuleInformation(
+        &bufferSize,
+        sizeof(AUX_MODULE_EXTENDED_INFO),
+        0);
+```
+
+Allocate memory for buffer
+
+```c
+moduleBuffer = (PAUX_MODULE_EXTENDED_INFO)ExAllocatePoolWithTag(NonPagedPool, bufferSize, 'tag');
+```
+
+Finally query modules information
+
+```c
+status = AuxKlibQueryModuleInformation(
+        &bufferSize,
+        sizeof(AUX_MODULE_EXTENDED_INFO),
+        moduleBuffer);
+```
+
+After that we get a list of `AUX_MODULE_EXTENDED_INFO` structures, declared as:
+
+```c
+typedef struct _AUX_MODULE_BASIC_INFO 
+{
+    PVOID ImageBase;
+} AUX_MODULE_BASIC_INFO, *PAUX_MODULE_BASIC_INFO;
+
+typedef struct _AUX_MODULE_EXTENDED_INFO 
+{
+    AUX_MODULE_BASIC_INFO BasicInfo;
+    ULONG ImageSize;
+    USHORT FileNameOffset;
+    UCHAR FullPathName [AUX_KLIB_MODULE_PATH_LEN];
+} AUX_MODULE_EXTENDED_INFO, *PAUX_MODULE_EXTENDED_INFO;
+```
+
+So we can use these information to find any specified system module.
+
 ## Method 2: Traverse system module list
 
 There is a `LIST_ENTRY` data structure in kernel named `PsLoadedModuleList`, which is the head of a list of information blocks about all kernel modules. Each block has a structure defined as below:
