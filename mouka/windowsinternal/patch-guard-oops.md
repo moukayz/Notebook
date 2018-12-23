@@ -1,7 +1,3 @@
----
-description: BugCheck 109
----
-
 # Patch Guard Oops
 
 ### CRITICAL\_STRUCTURE\_CORRUPTION \(109\) 

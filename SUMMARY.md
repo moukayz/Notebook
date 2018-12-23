@@ -1,6 +1,6 @@
 # Table of contents
 
-* [Notebooks for myself and my honey](README.md)
+* [Study hard and make progress every day](README.md)
 
 ## Mouka
 
