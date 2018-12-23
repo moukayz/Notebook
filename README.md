@@ -1,4 +1,6 @@
-# Notebooks for myself and my honey
+# Study hard and make progress every day
+
+
 
 
 
