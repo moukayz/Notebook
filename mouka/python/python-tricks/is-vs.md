@@ -5,7 +5,7 @@
 {% endhint %}
 
 {% hint style="info" %}
-**当两个变量的值相同时，“==”表达式为 True**
+**当两个变量的指向的对象相同时，“is”表达式为 True**
 {% endhint %}
 
 ```python

@@ -1,8 +1,8 @@
 # re.sub使用替换函数
 
-## re.sub\(pattern, repl, string, count=0, flags=0 \)
+`re.sub(pattern, repl, string, count=0, flags=0 )`
 
-## Use function as repl
+Use function as repl
 
 ```python
 >>> text = 'UPPER PYTHON, lower python, Mixed Python'

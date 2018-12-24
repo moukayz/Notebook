@@ -20,6 +20,7 @@
   * [20180626-27](mouka/driverdevelopment/20180626-27.md)
 * [Python](mouka/python/README.md)
   * [Python Tricks](mouka/python/python-tricks/README.md)
+    * [内置 http 服务器](mouka/python/python-tricks/nei-zhi-http-fu-wu-qi.md)
     * [函数作为变量](mouka/python/python-tricks/han-shu-zuo-wei-bian-liang.md)
     * ["is" vs "=="](mouka/python/python-tricks/is-vs.md)
     * [直接变量值交换](mouka/python/python-tricks/zhi-jie-bian-liang-zhi-jiao-huan.md)

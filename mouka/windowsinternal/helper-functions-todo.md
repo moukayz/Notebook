@@ -1,4 +1,2 @@
 # Helper Functions\(todo:\)
 
-
-
